@@ -166,7 +166,7 @@ pth_map = {
     'efficientnet-b7': 'efficientnet-b7-dcc49843.pth',
 }
 # 自动下载到本地预训练
-# model = EfficientNet.from_pretrained('efficientnet-b0')
+# model_ft = EfficientNet.from_pretrained('efficientnet-b0')
 # 离线加载预训练，需要事先下载好
 model_ft = EfficientNet.from_name(net_name)
 net_weight = 'eff_weights/' + pth_map[net_name]
