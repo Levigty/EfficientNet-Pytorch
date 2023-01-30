@@ -19,7 +19,7 @@ momentum = 0.9
 num_epochs = 60
 input_size = 1024
 class_num = 3
-net_name = 'efficientnet-b5'
+net_name = 'efficientnet-b3'
 
 
 def loaddata(data_dir, batch_size, set_name, shuffle):
