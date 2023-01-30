@@ -76,7 +76,7 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
 
             outputs = model_ft(inputs)
             
-            if count % 10 == 0:
+            if count % 500 == 0:
                 print(outputs)
                 print(labels)
 
@@ -172,7 +172,7 @@ def run():
     }
 
     # Automatically download to local pre-training
-    model_ft = EfficientNet.from_pretrained('efficientnet-b3')
+    model_ft = EfficientNet.from_pretrained(net_name)
 
     # Offline loading pre-training needs to be downloaded in advance
 
