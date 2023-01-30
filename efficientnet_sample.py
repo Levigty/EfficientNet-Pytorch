@@ -12,7 +12,7 @@ from efficientnet.model import EfficientNet
 # some parameters
 use_gpu = torch.cuda.is_available()
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-data_dir = '//kaggle//input//imagenetbirads//dataset//'
+data_dir = '//kaggle//tmp//imagenetbirads//dataset//'
 batch_size = 8
 lr = 0.01
 momentum = 0.9
@@ -69,15 +69,16 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
         for data in dset_loaders['train']:
             inputs, labels = data
             labels = torch.squeeze(labels.type(torch.LongTensor))
-            print(labels)
             if use_gpu:
                 inputs, labels = Variable(inputs.cuda()), Variable(labels.cuda())
             else:
                 inputs, labels = Variable(inputs), Variable(labels)
 
             outputs = model_ft(inputs)
-            print(outputs)
-            print(labels)
+            
+            if count % 10 == 0:
+                print(outputs)
+                print(labels)
 
             loss = criterion(outputs, labels)
             _, preds = torch.max(outputs.data, 1)
