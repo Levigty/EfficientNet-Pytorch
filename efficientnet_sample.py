@@ -17,7 +17,7 @@ batch_size = 6
 lr = 0.01
 momentum = 0.9
 num_epochs = 60
-input_size = 960
+input_size = 896
 class_num = 3
 net_name = 'efficientnet-b3'
 
