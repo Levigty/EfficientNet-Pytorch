@@ -15,7 +15,7 @@ def main():
     use_gpu = torch.cuda.is_available()
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     data_dir = '//kaggle//input//imagenetbirads//dataset//'
-    batch_size = 8
+    batch_size = 4
     lr = 0.01
     momentum = 0.9
     num_epochs = 60
