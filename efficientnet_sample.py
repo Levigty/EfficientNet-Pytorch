@@ -9,17 +9,27 @@ import time
 import os
 from efficientnet.model import EfficientNet
 
+import argparse
+
 # some parameters
 use_gpu = torch.cuda.is_available()
+print(use_gpu)
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-data_dir = '//kaggle//working//kompozisyonweighted//dataset//'
-batch_size = 4
-lr = 0.01
-momentum = 0.9
+
+data_dir = ''
 num_epochs = 40
-input_size = 896
-class_num = 4
+batch_size = 2
+input_size = 4
+class_num = 3
+
+load_weights = False
+weights_loc = ""
+
+lr = 0.01
 net_name = 'efficientnet-b3'
+
+momentum = 0.9
 
 
 def loaddata(data_dir, batch_size, set_name, shuffle):
@@ -77,9 +87,9 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
             outputs = model_ft(inputs)
             
             if count % 500 == 0:
-                print(outputs)
-                print(labels)
-
+                print(outputs, "outputs brah")
+                print(labels, "labels brahhh")
+            
             loss = criterion(outputs, labels)
             _, preds = torch.max(outputs.data, 1)
 
@@ -127,7 +137,7 @@ def test_model(model, criterion):
     cont = 0
     outPre = []
     outLabel = []
-    dset_loaders, dset_sizes = loaddata(data_dir=data_dir, batch_size=16, set_name='test', shuffle=False)
+    dset_loaders, dset_sizes = loaddata(data_dir=data_dir, batch_size=batch_size, set_name='test', shuffle=False)
     for data in dset_loaders['test']:
         inputs, labels = data
         labels = torch.squeeze(labels.type(torch.LongTensor))
@@ -158,6 +168,7 @@ def exp_lr_scheduler(optimizer, epoch, init_lr=0.01, lr_decay_epoch=10):
 
     return optimizer
 
+
 def run():
     # train
     pth_map = {
@@ -172,20 +183,23 @@ def run():
     }
 
     # Automatically download to local pre-training
-    model_ft = EfficientNet.from_pretrained(net_name)
 
     # Offline loading pre-training needs to be downloaded in advance
 
-    #model_ft = EfficientNet.from_name(net_name)
-    #net_weight = 'eff_weights/' + pth_map[net_name]
-    #state_dict = torch.load(net_weight)
-    #model_ft.load_state_dict(state_dict)
+    if load_weights:
+        model_ft = EfficientNet.from_name(net_name)
+        state_dict = torch.load(weights_loc)
+        model_ft.load_state_dict(state_dict)
+    else:
+        model_ft = EfficientNet.from_pretrained(net_name)
+
 
     # Modify the fully connected layer
     num_ftrs = model_ft._fc.in_features
     model_ft._fc = nn.Linear(num_ftrs, class_num)
 
     criterion = nn.CrossEntropyLoss()
+
     if use_gpu:
         model_ft = model_ft.cuda()
         criterion = criterion.cuda()
@@ -198,9 +212,46 @@ def run():
     # test
     print('-' * 10)
     print('Test Accuracy:')
+
     model_ft.load_state_dict(best_model_wts)
+
     criterion = nn.CrossEntropyLoss().cuda()
+
     test_model(model_ft, criterion)
 
 if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--data-dir', type=str, default=None, help='path of /dataset/')
+    parser.add_argument('--num-epochs', type=int, default=40)
+    parser.add_argument('--batch-size', type=int, default=4, help='total batch size for all GPUs')
+    parser.add_argument('--img-size', type=int, default=[1024, 1024], help='img sizes')
+    parser.add_argument('--class-num', type=int, default=3, help='class num')
+
+    parser.add_argument("--load-weights", type=bool, default=False, help="load weights")
+    parser.add_argument('--weights-loc', type=str, default= None, help='path of weights (if going to be loaded)')
+
+    parser.add_argument("--lr", type=float, default= 0.01, help="learning rate")
+    parser.add_argument("--net-name", type=str, default="efficientnet-b3", help="efficientnet type")
+
+
+    opt = parser.parse_args()
+
+    data_dir = opt.data_dir
+    num_epochs = opt.num_epochs
+    batch_size = opt.batch_size
+    input_size = opt.img_size
+    class_num = opt.class_num
+
+    load_weights = opt.load_weights
+    weights_loc = opt.weights_loc
+
+    lr = opt.lr
+    net_name = opt.net_name
+
+    print("data dir: ", data_dir, ",  num epochs: ", num_epochs, ",  batch size: ",batch_size,
+             ", img size: ", input_size, ", num of classes:", class_num, "loading weights?: ", load_weights, "if loaded, location:", weights_loc,
+             ", learning rate:", lr, ", net name:", net_name)
+
     run()
