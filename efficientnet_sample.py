@@ -12,13 +12,13 @@ from efficientnet.model import EfficientNet
 # some parameters
 use_gpu = torch.cuda.is_available()
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-data_dir = '//kaggle//working//biradsweighted//dataset//'
+data_dir = '//kaggle//working//kompozisyonweighted//dataset//'
 batch_size = 4
 lr = 0.01
 momentum = 0.9
 num_epochs = 40
 input_size = 896
-class_num = 3
+class_num = 4
 net_name = 'efficientnet-b3'
 
 
