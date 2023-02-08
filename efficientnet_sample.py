@@ -187,9 +187,7 @@ def run():
     # Offline loading pre-training needs to be downloaded in advance
 
     if load_weights:
-        model_ft = EfficientNet.from_name(net_name)
-        state_dict = torch.load(weights_loc)
-        model_ft.load_state_dict(state_dict)
+        model_ft = torch.load(weights_loc).cuda()
     else:
         model_ft = EfficientNet.from_pretrained(net_name)
 
