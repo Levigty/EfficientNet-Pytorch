@@ -60,8 +60,6 @@ def loaddata(data_dir, batch_size, set_name, shuffle):
     data_set_sizes = len(image_datasets[set_name])
     return dataset_loaders, data_set_sizes
 
-temp = True
-
 def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
 
     train_loss = []
