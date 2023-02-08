@@ -65,7 +65,14 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
     best_model_wts = model_ft.state_dict()
     best_acc = 0.0
     model_ft.train(True)
+
     for epoch in range(num_epochs):
+
+        if load_weights:
+            epoch += checkpoint['epoch']
+            load_weights = False
+            continue
+
         dset_loaders, dset_sizes = loaddata(data_dir=data_dir, batch_size=batch_size, set_name='train', shuffle=True)
         print('Data Size', dset_sizes)
         print('Epoch {}/{}'.format(epoch, num_epochs - 1))
@@ -187,6 +194,7 @@ def run():
     # Offline loading pre-training needs to be downloaded in advance
 
     if load_weights:
+        checkpoint = torch.load(weights_loc)
         model_ft = torch.load(weights_loc).cuda()
     else:
         model_ft = EfficientNet.from_pretrained(net_name)
