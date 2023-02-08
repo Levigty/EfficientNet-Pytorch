@@ -29,6 +29,8 @@ weights_loc = ""
 lr = 0.01
 net_name = 'efficientnet-b3'
 
+epoch_to_resume_from = 0
+
 momentum = 0.9
 
 
@@ -58,20 +60,17 @@ def loaddata(data_dir, batch_size, set_name, shuffle):
     data_set_sizes = len(image_datasets[set_name])
     return dataset_loaders, data_set_sizes
 
+temp = True
 
 def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
+
     train_loss = []
     since = time.time()
     best_model_wts = model_ft.state_dict()
     best_acc = 0.0
     model_ft.train(True)
 
-    for epoch in range(num_epochs):
-
-        if load_weights:
-            epoch += checkpoint['epoch']
-            load_weights = False
-            continue
+    for epoch in range(epoch_to_resume_from, num_epochs):
 
         dset_loaders, dset_sizes = loaddata(data_dir=data_dir, batch_size=batch_size, set_name='train', shuffle=True)
         print('Data Size', dset_sizes)
@@ -94,8 +93,8 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
             outputs = model_ft(inputs)
             
             if count % 500 == 0:
-                print(outputs, "outputs brah")
-                print(labels, "labels brahhh")
+                print(outputs)
+                print(labels)
             
             loss = criterion(outputs, labels)
             _, preds = torch.max(outputs.data, 1)
@@ -194,8 +193,7 @@ def run():
     # Offline loading pre-training needs to be downloaded in advance
 
     if load_weights:
-        checkpoint = torch.load(weights_loc)
-        model_ft = torch.load(weights_loc).cuda()
+        model_ft = torch.load(weights_loc)
     else:
         model_ft = EfficientNet.from_pretrained(net_name)
 
@@ -225,6 +223,8 @@ def run():
 
     test_model(model_ft, criterion)
 
+
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
@@ -235,11 +235,13 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', type=int, default=[1024, 1024], help='img sizes')
     parser.add_argument('--class-num', type=int, default=3, help='class num')
 
-    parser.add_argument("--load-weights", type=bool, default=False, help="load weights")
+    parser.add_argument("--load-weights", type=bool, default=False, help="load or not")
     parser.add_argument('--weights-loc', type=str, default= None, help='path of weights (if going to be loaded)')
 
     parser.add_argument("--lr", type=float, default= 0.01, help="learning rate")
     parser.add_argument("--net-name", type=str, default="efficientnet-b3", help="efficientnet type")
+
+    parser.add_argument('--resume-epoch', type=int, default=0, help='what epoch to start from')
 
 
     opt = parser.parse_args()
@@ -256,8 +258,10 @@ if __name__ == '__main__':
     lr = opt.lr
     net_name = opt.net_name
 
+    epoch_to_resume_from = opt.resume_epoch
+
     print("data dir: ", data_dir, ",  num epochs: ", num_epochs, ",  batch size: ",batch_size,
              ", img size: ", input_size, ", num of classes:", class_num, "loading weights?: ", load_weights, "if loaded, location:", weights_loc,
-             ", learning rate:", lr, ", net name:", net_name)
+             ", learning rate:", lr, ", net name:", net_name, "epoch to resume from: ", epoch_to_resume_from)
 
     run()
