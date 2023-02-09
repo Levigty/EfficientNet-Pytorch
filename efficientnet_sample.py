@@ -22,15 +22,10 @@ num_epochs = 40
 batch_size = 2
 input_size = 4
 class_num = 3
-
-load_weights = False
 weights_loc = ""
-
 lr = 0.01
 net_name = 'efficientnet-b3'
-
 epoch_to_resume_from = 0
-
 momentum = 0.9
 
 
@@ -59,6 +54,7 @@ def loaddata(data_dir, batch_size, set_name, shuffle):
                                                       shuffle=shuffle, num_workers=1) for x in [set_name]}
     data_set_sizes = len(image_datasets[set_name])
     return dataset_loaders, data_set_sizes
+
 
 def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
 
@@ -124,7 +120,7 @@ def train_model(model_ft, criterion, optimizer, lr_scheduler, num_epochs=50):
     # save best model
     save_dir = data_dir + '/model'
     model_ft.load_state_dict(best_model_wts)
-    model_out_path = save_dir + "/" + net_name + 'pth'
+    model_out_path = save_dir + "/" + net_name + '.pth'
     torch.save(model_ft, model_out_path)
 
     time_elapsed = time.time() - since
@@ -186,11 +182,9 @@ def run():
         'efficientnet-b7': 'efficientnet-b7-dcc49843.pth',
     }
 
-    # Automatically download to local pre-training
 
-    # Offline loading pre-training needs to be downloaded in advance
 
-    if load_weights:
+    if weights_loc != None:
         model_ft = torch.load(weights_loc)
     else:
         model_ft = EfficientNet.from_pretrained(net_name)
@@ -233,13 +227,15 @@ if __name__ == '__main__':
     parser.add_argument('--img-size', type=int, default=[1024, 1024], help='img sizes')
     parser.add_argument('--class-num', type=int, default=3, help='class num')
 
-    parser.add_argument("--load-weights", type=bool, default=False, help="load or not")
     parser.add_argument('--weights-loc', type=str, default= None, help='path of weights (if going to be loaded)')
 
     parser.add_argument("--lr", type=float, default= 0.01, help="learning rate")
     parser.add_argument("--net-name", type=str, default="efficientnet-b3", help="efficientnet type")
 
     parser.add_argument('--resume-epoch', type=int, default=0, help='what epoch to start from')
+
+    parser.add_argument('--momentum', type=float, default=0.9, help='momentum')
+
 
 
     opt = parser.parse_args()
@@ -250,7 +246,6 @@ if __name__ == '__main__':
     input_size = opt.img_size
     class_num = opt.class_num
 
-    load_weights = opt.load_weights
     weights_loc = opt.weights_loc
 
     lr = opt.lr
@@ -258,8 +253,10 @@ if __name__ == '__main__':
 
     epoch_to_resume_from = opt.resume_epoch
 
+    momentum = opt.momentum
+
     print("data dir: ", data_dir, ",  num epochs: ", num_epochs, ",  batch size: ",batch_size,
-             ", img size: ", input_size, ", num of classes:", class_num, "loading weights?: ", load_weights, "if loaded, location:", weights_loc,
-             ", learning rate:", lr, ", net name:", net_name, "epoch to resume from: ", epoch_to_resume_from)
+             ", img size: ", input_size, ", num of classes:", class_num, ".pth weights file location:", weights_loc,
+             ", learning rate:", lr, ", net name:", net_name, "epoch to resume from: ", epoch_to_resume_from, "momen")
 
     run()
